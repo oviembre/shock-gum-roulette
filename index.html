@@ -1,0 +1,285 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Shock Gum Roulette</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#080808;display:flex;align-items:center;justify-content:center;font-family:'Courier New',Courier,monospace;overflow:hidden;touch-action:manipulation}
+.device{background:linear-gradient(160deg,#301a00,#160e00);border-radius:22px;padding:14px 12px 10px;box-shadow:0 14px 50px rgba(0,0,0,.95),inset 0 1px 0 rgba(255,180,60,.08);width:min(430px,100vw - 8px);user-select:none;-webkit-user-select:none}
+.brand{text-align:center;color:#5a3800;font-size:8px;letter-spacing:3px;margin-bottom:8px}
+.lcd{background:#0c160c;border-radius:10px;padding:14px 12px;box-shadow:inset 0 0 35px rgba(0,0,0,.8);position:relative;overflow:hidden}
+.lcd::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:5;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.1) 2px,rgba(0,0,0,.1) 3px)}
+@keyframes lcdF{0%,100%{opacity:1}50%{opacity:.91}}.lcd{animation:lcdF 7s ease-in-out infinite}
+.g{color:#44ff44;text-shadow:0 0 6px #44ff4499}.gd{color:#184018}.r{color:#ff4444;text-shadow:0 0 6px #ff444499}.y{color:#ffdd44;text-shadow:0 0 6px #ffdd4499}.b{color:#44bbff;text-shadow:0 0 6px #44bbff99}.p{color:#cc77ff;text-shadow:0 0 6px #cc77ff99}
+.seg{font-size:10px;font-weight:700;letter-spacing:1px}.seg-sm{font-size:8px;font-weight:700;letter-spacing:1px}.seg-xs{font-size:7px;font-weight:700;letter-spacing:1px}.seg-xl{font-size:20px;font-weight:700;letter-spacing:3px}
+.h-on{color:#ff4444;text-shadow:0 0 5px #ff444499;font-size:13px}.h-off{color:#1c1c1c;font-size:13px}
+.gum-grid{display:flex;gap:5px;justify-content:center;flex-wrap:wrap}
+.gum-slot{width:17px;height:27px;border:1.5px solid #183018;border-radius:3px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .1s,box-shadow .1s}
+.gum-slot:hover{border-color:#44ff44;box-shadow:0 0 5px #44ff4455}.gum-slot.sel{border-color:#ffdd44;box-shadow:0 0 8px #ffdd4488}.gum-slot.done{border-color:#0d200d;cursor:default}
+.gum-stick{width:9px;height:20px;border-radius:2px;background:#44ff44;box-shadow:0 0 4px #44ff4488}.gum-stick.e{background:transparent;box-shadow:none}
+.btn{font-family:'Courier New',Courier,monospace;font-weight:700;letter-spacing:1px;border-radius:5px;cursor:pointer;border:2px solid;transition:all .1s;display:block;-webkit-tap-highlight-color:transparent}
+.btn:active:not(:disabled){transform:scale(.95)}.btn:disabled{opacity:.18;cursor:default;pointer-events:none}
+.btn-s{width:100%;padding:9px 0;font-size:11px;border-color:#44ff44;color:#44ff44;background:#09150a;text-shadow:0 0 5px #44ff4488;box-shadow:0 0 8px #44ff4422}
+.btn-s:hover:not(:disabled){background:#44ff44;color:#09150a;text-shadow:none}
+.btn-h{width:100%;padding:9px 0;font-size:11px;border-color:#ff4444;color:#ff4444;background:#150909;text-shadow:0 0 5px #ff444488;box-shadow:0 0 8px #ff444422}
+.btn-h:hover:not(:disabled){background:#ff4444;color:#150909;text-shadow:none}
+.btn-st{width:100%;padding:12px 0;font-size:14px;letter-spacing:4px;border-color:#ffdd44;color:#ffdd44;background:#151000;text-shadow:0 0 6px #ffdd4488;box-shadow:0 0 12px #ffdd4422}
+.btn-st:hover{background:#ffdd44;color:#151000;text-shadow:none}
+.btn-b{flex:1;padding:8px 0;font-size:11px;letter-spacing:2px;border-color:#44bbff;color:#44bbff;background:#000e18;text-shadow:0 0 5px #44bbff88}
+.btn-b:hover{background:#44bbff;color:#000e18;text-shadow:none}
+.ib{width:33px;height:33px;border:1.5px solid #183018;background:#07100a;border-radius:4px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;-webkit-tap-highlight-color:transparent}
+.ib:hover:not(.used){border-color:#44ff44;box-shadow:0 0 6px #44ff4488;transform:scale(1.1)}.ib:active:not(.used){transform:scale(.9)}.ib.used{opacity:.14;cursor:default;pointer-events:none}
+.sp{font-size:26px;line-height:1;transition:filter .2s}.spp{filter:drop-shadow(0 0 4px #44ff4488)}.spr{filter:drop-shadow(0 0 4px #ff444488)}.spy{filter:drop-shadow(0 0 4px #ffdd4488)}.spb{filter:drop-shadow(0 0 4px #44bbff88)}
+@keyframes zapF{0%,100%{background:#0c160c}25%{background:#001830}75%{background:#001830}}
+@keyframes shkF{0%,100%{transform:none}15%{transform:translate(-5px,1px)}35%{transform:translate(5px,-1px)}55%{transform:translate(-4px,2px)}75%{transform:translate(4px,-2px)}90%{transform:translate(-2px,1px)}}
+.fx-z{animation:zapF .55s steps(2) 2}.fx-s{animation:shkF .5s ease-in-out}
+.row{display:flex;align-items:center}.rsb{display:flex;align-items:center;justify-content:space-between}.rc{display:flex;align-items:center;justify-content:center}
+.col{display:flex;flex-direction:column}.cc{display:flex;flex-direction:column;align-items:center}
+.g1{gap:4px}.g2{gap:8px}.f1{flex:1}.tc{text-align:center}
+.mt1{margin-top:4px}.mt2{margin-top:8px}.mt3{margin-top:12px}.mb1{margin-bottom:4px}.mb2{margin-bottom:8px}.mb3{margin-bottom:12px}
+.mh4{min-height:16px}.mh5{min-height:20px}.hr{height:1px;background:#0e280e;margin:8px 0}
+.sh{display:none!important}
+</style>
+</head>
+<body>
+<div class="device">
+<div class="brand">SHOCK GUM ROULETTE &middot; SGR-01</div>
+<div class="lcd" id="lcd">
+
+<div id="s-title">
+  <div class="tc mb2">
+    <div class="seg-xl g mb1">SGR</div>
+    <div class="seg y">SHOCK GUM ROULETTE</div>
+    <div class="seg-sm gd mt1">&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;</div>
+  </div>
+  <div class="tc mb2" style="color:#1a3d1a;font-size:10px;line-height:2">
+    &#129602; &nbsp; VS &nbsp; &#127911;<br>
+    DARE &nbsp;&#127852;&nbsp; DARE
+  </div>
+  <div class="tc mb3">
+    <div class="seg-sm gd">TWO SKATERS &middot; ONE SUSPICIOUS GUM PACK</div>
+    <div class="seg-sm gd mt1">WHO CHICKENS OUT FIRST?</div>
+  </div>
+  <div class="hr"></div>
+  <div class="tc mt2 mb1 seg-xs gd">&mdash; HOW TO PLAY &mdash;</div>
+  <div class="tc mb1 seg-xs gd">PICK A GUM &rarr; PULL SELF OR HAND IT TO RIVAL</div>
+  <div class="tc mb3 seg-xs gd">TRAPS DRAIN &#9829; &middot; DRAIN RIVAL'S &#9829; TO WIN</div>
+  <div class="hr"></div>
+  <div class="mt3"><button class="btn btn-st" onclick="startGame()">&#9616; START &#9618;</button></div>
+</div>
+
+<div id="s-game" class="sh">
+  <div class="rsb mb2">
+    <div class="seg-sm g">DARE IF U CAN</div>
+    <div class="row g2">
+      <div class="seg-sm gd" id="g-rnd">RND:01</div>
+      <div class="seg-sm y" id="g-crd">CRED:000</div>
+    </div>
+  </div>
+  <div class="rsb mb2">
+    <div class="row g1"><div class="seg-xs gd">YOU</div><div id="p1h" class="row g1 mt1"></div></div>
+    <div class="seg-xs gd" id="g-tr">TRAPS:?/?</div>
+    <div class="row g1"><div id="p2h" class="row g1 mt1"></div><div class="seg-xs gd">RVL</div></div>
+  </div>
+  <div class="hr"></div>
+  <div class="row g2 mt2 mb2" style="align-items:flex-start">
+    <div class="cc" style="min-width:58px">
+      <div class="sp spp" id="sp1">&#129730;</div>
+      <div class="seg-xs mt1" id="st1" style="color:#183018">READY</div>
+      <div class="cc mt2 g1">
+        <div class="seg-xs gd" style="font-size:6px">ITEMS</div>
+        <div id="i1" class="cc g1"></div>
+      </div>
+    </div>
+    <div class="cc f1">
+      <div class="seg-xs gd mb1" style="font-size:7px">&mdash; GUM BOX &mdash;</div>
+      <div id="gg" class="gum-grid mb2"></div>
+      <div class="seg-sm mh4 tc mb1" id="g-hint" style="color:#183018;font-size:8px">PICK A GUM</div>
+      <div class="seg mh5 tc" id="g-msg" style="color:#44ff44;font-size:9px"></div>
+    </div>
+    <div class="cc" style="min-width:58px">
+      <div class="sp spp" id="sp2">&#127911;</div>
+      <div class="seg-xs mt1" id="st2" style="color:#183018">WAIT</div>
+      <div class="cc mt2 g1">
+        <div class="seg-xs gd" style="font-size:6px">ITEMS</div>
+        <div id="i2" class="cc g1"></div>
+      </div>
+    </div>
+  </div>
+  <div class="hr"></div>
+  <div class="tc mt2 mb2"><div class="seg" id="g-tb" style="color:#44ff44;font-size:10px;letter-spacing:2px">&#9654; YOUR TURN</div></div>
+  <div class="row g2 mb2">
+    <button id="b-s" class="btn btn-s" onclick="doAct('self')" disabled>&#9616;PULL SELF&#9618;</button>
+    <button id="b-h" class="btn btn-h" onclick="doAct('hand')" disabled>&#9616;HAND IT&#9618;</button>
+  </div>
+  <div class="rsb">
+    <div class="seg-xs gd" id="g-fx" style="font-size:7px"></div>
+    <button onclick="showTitle()" style="background:none;border:none;color:#183018;font-family:'Courier New',monospace;font-size:8px;cursor:pointer;letter-spacing:1px">[QUIT]</button>
+  </div>
+</div>
+
+<div id="s-end" class="sh">
+  <div class="tc">
+    <div class="seg-sm gd mb3">&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;</div>
+    <div class="seg-xl mb2" id="e-res">U WIN!</div>
+    <div class="seg mb3" id="e-sub" style="font-size:10px"></div>
+    <div class="hr"></div>
+    <div class="mt2 mb1 seg-xs gd">STREET CRED EARNED</div>
+    <div class="seg-xl y mb1" id="e-sc">000</div>
+    <div class="seg-xs gd mb3" id="e-dt"></div>
+    <div class="hr"></div>
+    <div class="row g2 mt3">
+      <button class="btn btn-b" onclick="startGame()">&#9616;AGAIN&#9618;</button>
+      <button class="btn btn-b" onclick="showTitle()">&#9616;TITLE&#9618;</button>
+    </div>
+  </div>
+</div>
+
+</div>
+<div class="rsb mt2" style="padding:0 20px">
+  <div style="width:11px;height:11px;border-radius:50%;background:#0e0800;border:2px solid #251200"></div>
+  <div style="width:11px;height:11px;border-radius:50%;background:#0e0800;border:2px solid #251200"></div>
+</div>
+</div>
+
+<script>
+var AC=null;
+function getAC(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();return AC;}
+function tone(f,d,t,v,dc){t=t||'square';v=v||0.14;dc=dc||0.85;try{var a=getAC(),o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.type=t;o.frequency.setValueAtTime(f,a.currentTime);g.gain.setValueAtTime(v,a.currentTime);g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+d*dc);o.start();o.stop(a.currentTime+d);}catch(e){}}
+function sfx(n){try{if(getAC().state==='suspended')getAC().resume();}catch(e){}var T=setTimeout;
+if(n==='pick')tone(880,.05,'square',.08);
+else if(n==='safe'){tone(660,.08,'sine',.12);T(function(){tone(880,.1,'sine',.1);},80);}
+else if(n==='shock'){tone(120,.08,'sawtooth',.2);T(function(){tone(180,.15,'sawtooth',.15);},60);T(function(){tone(90,.2,'sawtooth',.1);},150);}
+else if(n==='bug'){for(var i=0;i<5;i++)(function(j){T(function(){tone(350+Math.random()*300,.05,'square',.1);},j*55);})(i);}
+else if(n==='mega'){tone(55,.35,'sawtooth',.28);T(function(){tone(40,.4,'sawtooth',.22);},200);}
+else if(n==='lucky'){[523,659,784,1047].forEach(function(f,i){T(function(){tone(f,.12,'sine',.12);},i*85);});}
+else if(n==='item'){tone(440,.05,'square',.1);T(function(){tone(660,.08,'square',.1);},60);}
+else if(n==='win'){[523,659,784,523,659,784,1047].forEach(function(f,i){T(function(){tone(f,.14,'square',.14);},i*95);});}
+else if(n==='lose'){[440,370,310,260].forEach(function(f,i){T(function(){tone(f,.2,'square',.12);},i*110);});}
+else if(n==='sel')tone(660,.04,'square',.07);
+else if(n==='reflect'){tone(880,.06,'sine',.12);T(function(){tone(1100,.1,'sine',.1);},70);}
+else if(n==='newbox'){[330,440,550].forEach(function(f,i){T(function(){tone(f,.1,'square',.1);},i*100);});}}
+
+var CM=['\uD83D\uDD76\uFE0F','\uD83D\uDE37','\uD83D\uDEF9','\uD83E\uDE79'];
+var RA=['\uD83E\uDDE4','\uD83D\uDCF9','\uD83E\uDDC3','\uD83E\uDE9E'];
+var II={'\uD83D\uDD76\uFE0F':{n:'SHADES',d:'Peek at 1 gum slot'},'\uD83D\uDE37':{n:'MASK',d:'Remove 1 gum (unknown)'},'\uD83D\uDEF9':{n:'DECK',d:'Act twice this turn'},'\uD83E\uDE79':{n:'BANDAGE',d:'Heal 1 heart'},'\uD83E\uDDE4':{n:'GLOVES',d:'Block next trap'},'\uD83D\uDCF9':{n:'DV CAM',d:'Rival +1 dmg this turn'},'\uD83E\uDDC3':{n:'JUICE',d:'Bonus full turn'},'\uD83E\uDE9E':{n:'MIRROR',d:'Reflect HAND IT back'}};
+var G={};
+function rnd(a){return a[Math.floor(Math.random()*a.length)];}
+function ri(n,p){var a=[];for(var i=0;i<n;i++)a.push(rnd(p));return a;}
+function mkBox(sz,tr){var b=[];for(var i=0;i<sz-tr;i++)b.push('safe');for(var j=0;j<tr;j++){var r=Math.random();b.push(r<.1?'mega':r<.22?'lucky':Math.random()<.5?'shock':'bug');}return b.sort(function(){return Math.random()-.5;});}
+function newGame(){G={hp:[3,3],turn:0,round:1,traps:2,box:[],done:[],sel:-1,items:[ri(2,CM),ri(2,CM)],shield:[false,false],dv:false,mirror:false,deck:false,deckN:0,juice:false,score:0,over:false,busy:false,known:{}};G.box=mkBox(6,2);G.done=Array(6).fill(false);}
+
+function show(id){['s-title','s-game','s-end'].forEach(function(s){document.getElementById(s).classList.toggle('sh',s!==id);});}
+function showTitle(){show('s-title');}
+function startGame(){newGame();show('s-game');rf();msg('');hint('PICK A GUM','#183018');btns(false,false);}
+
+function rf(){rHp();rBox();rItems();rTurn();rFx();rStats();}
+function rHp(){for(var p=0;p<2;p++){var el=document.getElementById('p'+(p+1)+'h');el.innerHTML=[0,1,2].map(function(i){return'<span class="'+(i<G.hp[p]?'h-on':'h-off')+'">\u2665</span>';}).join('');}}
+function rBox(){var el=document.getElementById('gg');el.innerHTML=G.box.map(function(g,i){if(G.done[i])return'<div class="gum-slot done"><div class="gum-stick e"></div></div>';var c=G.sel===i?'sel':'';return'<div class="gum-slot '+c+'" onclick="pickG('+i+')"><div class="gum-stick"></div></div>';}).join('');}
+function rItems(){for(var p=0;p<2;p++){var el=document.getElementById('i'+(p+1));var it=G.items[p];if(!it.length){el.innerHTML='<span style="color:#183018;font-size:8px">--</span>';continue;}el.innerHTML=it.map(function(x,i){var inf=II[x]||{n:x,d:''};if(p===0)return'<div class="ib" onclick="useIt('+i+')" title="'+inf.n+': '+inf.d+'">'+x+'</div>';return'<div class="ib used" title="'+inf.n+'">'+x+'</div>';}).join('');}}
+function rTurn(){if(G.over)return;var tb=document.getElementById('g-tb');var ex=G.deck&&G.deckN>0?' [DECK\xd7'+G.deckN+']':G.juice?' [JUICE]':'';tb.textContent=G.turn===0?'\u25b6 YOUR TURN'+ex:'\u00b7 RVL TURN \u00b7';tb.style.color=G.turn===0?'#44ff44':'#44bbff';var s1=document.getElementById('st1'),s2=document.getElementById('st2');s1.textContent=G.turn===0?'YOUR TURN':'WAIT';s1.style.color=G.turn===0?'#44ff44':'#183018';s2.textContent=G.turn===1?'GOES NEXT':'WAIT';s2.style.color=G.turn===1?'#44bbff':'#183018';}
+function rFx(){var e=[];if(G.shield[0])e.push('GLOVES');if(G.dv)e.push('DV ON');if(G.mirror)e.push('MIRROR');document.getElementById('g-fx').textContent=e.join(' \u00b7 ');}
+function rStats(){var rem=G.box.filter(function(_,i){return!G.done[i];}).length;var tr=G.box.filter(function(g,i){return!G.done[i]&&g!=='safe';}).length;document.getElementById('g-tr').textContent='TRAPS:'+tr+'/'+rem;document.getElementById('g-rnd').textContent='RND:'+String(G.round).padStart(2,'0');document.getElementById('g-crd').textContent='CRED:'+String(G.score).padStart(3,'0');}
+function msg(t,c){var e=document.getElementById('g-msg');e.textContent=t||'';e.style.color=c||'#44ff44';}
+function hint(t,c){var e=document.getElementById('g-hint');e.textContent=t||'';e.style.color=c||'#183018';}
+function btns(s,h){document.getElementById('b-s').disabled=!s;document.getElementById('b-h').disabled=!h;}
+function sp(p,em,cls){var e=document.getElementById('sp'+(p+1));e.textContent=em;e.className='sp '+(cls||'spp');}
+function fxA(type){var s=document.getElementById('lcd');s.classList.remove('fx-z','fx-s');void s.offsetWidth;if(type){s.classList.add(type);setTimeout(function(){s.classList.remove(type);},2000);}}
+function slp(ms){return new Promise(function(r){setTimeout(r,ms);});}
+
+function pickG(idx){if(G.busy||G.over||G.turn!==0)return;if(G.done[idx])return;G.sel=idx;sfx('sel');hint('SLOT '+(idx+1)+' SELECTED \u2014 PULL SELF OR HAND IT?','#ffdd44');btns(true,true);rBox();}
+
+async function doAct(act){
+  if(G.busy||G.over||G.turn!==0||G.sel<0)return;
+  var idx=G.sel;G.sel=-1;btns(false,false);hint('','#183018');
+  if(act==='hand'&&G.mirror){G.mirror=false;sfx('reflect');msg('MIRROR! REFLECTED BACK TO YOU!','#cc77ff');rFx();await slp(700);act='self';}
+  await res(idx,act==='self'?0:1);
+  if(G.over)return;
+  if(G.deck&&G.deckN>0){G.deckN--;if(G.deckN>0){msg('DECK: '+G.deckN+' ACTION LEFT!','#ffdd44');hint('PICK ANOTHER GUM','#ffdd44');await slp(500);rf();return;}else{G.deck=false;G.deckN=0;}}
+  if(G.juice){G.juice=false;msg('JUICE: BONUS TURN!','#44bbff');hint('PICK A GUM','#44ff44');await slp(700);rf();return;}
+  G.dv=false;G.turn=1;rf();hint('','#183018');msg('','#44ff44');
+  setTimeout(aiT,950);
+}
+
+async function res(idx,target){
+  G.busy=true;
+  var avail=G.box.map(function(_,i){return i;}).filter(function(i){return!G.done[i];});
+  if(!avail.length||idx<0||G.done[idx]){
+    G.round++;G.traps=Math.min(G.traps+1,5);
+    var sz=Math.min(5+G.round,8);
+    G.box=mkBox(sz,G.traps);G.done=Array(sz).fill(false);G.known={};
+    [0,1].forEach(function(p){G.items[p].push(rnd(CM));if(G.items[p].length>3)G.items[p].shift();});
+    sfx('newbox');msg('NEW BOX \u00b7 RND '+G.round+' \u00b7 TRAPS +1','#ffdd44');await slp(900);
+    avail=G.box.map(function(_,i){return i;});
+    if(idx<0||G.done[idx])idx=rnd(avail);
+  }
+  if(G.done[idx])idx=rnd(avail);
+  G.done[idx]=true;delete G.known[idx];rBox();rStats();
+  var gum=G.box[idx];var tn=target===0?'YOU':'RVL';var dvB=G.dv&&target===1;
+  if(gum==='safe'){sp(target,target===0?'\uD83D\uDE0C':'\uD83D\uDE24');sfx('safe');msg(tn+': SAFE! \u2713','#44ff44');G.score+=target===0?10:5;await slp(600);}
+  else if(gum==='shock'||gum==='bug'){
+    if(G.shield[target]){G.shield[target]=false;sp(target,target===0?'\uD83D\uDE0E':'\uD83D\uDE24','spb');sfx('item');msg(tn+': GLOVES BLOCKED! \uD83E\uDDE4','#44bbff');}
+    else{var dm=1+(dvB?1:0);G.hp[target]=Math.max(0,G.hp[target]-dm);sp(target,gum==='shock'?(target===0?'\uD83D\uDE31':'\uD83D\uDE28'):(target===0?'\uD83E\uDD22':'\uD83E\uDD2E'),gum==='shock'?'spb':'spp');sfx(gum);fxA(gum==='shock'?'fx-z':'fx-s');msg(tn+': '+(gum==='shock'?'SHOCKED \u26A1':'BUGGED \uD83D\uDC1B')+(dvB?' [DV+1]':'')+' -'+dm+'\u2665',gum==='shock'?'#44bbff':'#44ff44');}
+    await slp(950);
+  }
+  else if(gum==='mega'){var dm2=2+(dvB?1:0);G.hp[target]=Math.max(0,G.hp[target]-dm2);sp(target,'\uD83D\uDC80','spr');sfx('mega');fxA('fx-z');msg(tn+': MEGA TRAP!! \uD83D\uDC80 -'+dm2+'\u2665','#ff4444');await slp(1200);}
+  else if(gum==='lucky'){G.hp[target]=Math.min(3,G.hp[target]+1);var ri2=rnd(RA);G.items[target].push(ri2);if(G.items[target].length>3)G.items[target].shift();sp(target,target===0?'\uD83E\uDD29':'\uD83D\uDE32','spy');sfx('lucky');msg(tn+': LUCKY! +1\u2665 + '+(II[ri2]?II[ri2].n:ri2),'#ffdd44');await slp(1000);}
+  rHp();
+  if(G.hp[target]<=0){G.over=true;var w=1-target;sp(0,w===0?'\uD83E\uDD19':'\uD83D\uDE35',w===0?'spy':'spr');sp(1,w===1?'\uD83E\uDD18':'\uD83D\uDE35',w===1?'spy':'spr');sfx(w===0?'win':'lose');if(w===0)G.score+=150;setTimeout(function(){showEnd(w);},1300);}
+  G.busy=false;
+}
+
+async function aiT(){
+  if(G.over)return;
+  sp(1,'\uD83E\uDD28','spb');msg('RVL THINKING...','#44bbff');
+  document.getElementById('st2').textContent='THINKING';document.getElementById('st2').style.color='#44bbff';
+  await slp(650+Math.random()*750);
+  if(G.items[1].indexOf('\uD83E\uDE79')>=0&&G.hp[1]<3&&Math.random()<.65){var ii=G.items[1].indexOf('\uD83E\uDE79');G.items[1].splice(ii,1);G.hp[1]=Math.min(3,G.hp[1]+1);sfx('item');msg('RVL: BANDAGE +1\u2665','#44ff44');rHp();rItems();await slp(700);}
+  if(G.items[1].indexOf('\uD83D\uDCF9')>=0&&Math.random()<.38){var ii2=G.items[1].indexOf('\uD83D\uDCF9');G.items[1].splice(ii2,1);G.dv=true;sfx('item');msg('RVL: DV CAM ON! YOU TAKE +1 DMG','#ff4444');rFx();rItems();await slp(650);}
+  var avail=G.box.map(function(_,i){return i;}).filter(function(i){return!G.done[i];});
+  if(!avail.length){G.turn=0;rf();hint('PICK A GUM','#183018');return;}
+  var ks=avail.filter(function(i){return G.known[i]==='safe';});
+  var kt=avail.filter(function(i){return G.known[i]==='trap';});
+  var uk=avail.filter(function(i){return!G.known[i];});
+  var ci,at;
+  if(kt.length>0&&Math.random()<.88){ci=kt[0];at=0;msg('RVL: HAND IT \u2192 YOU \u26A1','#ff4444');}
+  else if(ks.length>0&&G.hp[1]<3){ci=ks[0];at=1;msg('RVL: PULL SELF (safe)','#44bbff');}
+  else{ci=rnd(uk.length?uk:avail);var hc=G.hp[1]<=1?.82:G.hp[1]===2?.58:.38;at=Math.random()<hc?0:1;msg(at===0?'RVL: HAND IT \u2192 YOU':'RVL: PULL SELF',at===0?'#ff4444':'#44bbff');}
+  await slp(400);
+  if(at===0&&G.mirror){G.mirror=false;sfx('reflect');msg('MIRROR! REFLECTED BACK TO RVL!','#cc77ff');rFx();await slp(700);at=1;}
+  await res(ci,at);
+  if(!G.over){G.dv=false;G.turn=0;sp(1,'\uD83C\uDFA7','spp');rf();hint('PICK A GUM','#183018');msg('','#44ff44');}
+}
+
+async function useIt(idx){
+  if(G.busy||G.over||G.turn!==0)return;
+  var it=G.items[0][idx];if(!it)return;
+  G.items[0].splice(idx,1);sfx('item');
+  var avail=G.box.map(function(_,i){return i;}).filter(function(i){return!G.done[i];});
+  if(it==='\uD83D\uDD76\uFE0F'){if(avail.length){var p=rnd(avail),sf=G.box[p]==='safe';G.known[p]=sf?'safe':'trap';msg('SHADES: SLOT '+(p+1)+' = '+(sf?'SAFE \u2713':'TRAP \u2717'),sf?'#44ff44':'#ff4444');}}
+  else if(it==='\uD83D\uDE37'){if(avail.length){var p2=rnd(avail);G.done[p2]=true;delete G.known[p2];msg('MASK: REMOVED SLOT '+(p2+1),'#ffdd44');rBox();rStats();}}
+  else if(it==='\uD83D\uDEF9'){G.deck=true;G.deckN=2;msg('DECK: ACT TWICE THIS TURN!','#ffdd44');}
+  else if(it==='\uD83E\uDE79'){G.hp[0]=Math.min(3,G.hp[0]+1);msg('BANDAGE: +1\u2665','#44ff44');rHp();}
+  else if(it==='\uD83E\uDDE4'){G.shield[0]=true;msg('GLOVES READY: NEXT TRAP BLOCKED','#44bbff');}
+  else if(it==='\uD83D\uDCF9'){G.dv=true;msg('DV CAM: RVL TAKES +1 DMG THIS TURN','#ff4444');}
+  else if(it==='\uD83E\uDDC3'){G.juice=true;msg('JUICE: BONUS TURN INCOMING!','#44bbff');}
+  else if(it==='\uD83E\uDE9E'){G.mirror=true;msg('MIRROR READY: NEXT HAND IT REFLECTED','#cc77ff');}
+  rItems();rTurn();rFx();
+}
+
+function showEnd(w){
+  document.getElementById('e-res').textContent=w===0?'U WIN!':'BUSTED!';
+  document.getElementById('e-res').style.color=w===0?'#ffdd44':'#ff4444';
+  document.getElementById('e-sub').textContent=w===0?'RVL CHICKENED OUT \u2014 U STAY COOL':'U CHICKENED OUT \u2014 RVL WINS';
+  document.getElementById('e-sub').style.color=w===0?'#44ff44':'#ff4444';
+  document.getElementById('e-sc').textContent=String(G.score).padStart(3,'0');
+  var t=G.score>=250?'GOD TIER':G.score>=150?'ICE COLD':G.score>=80?'SOLID':G.score>=30?'SHAKY':'CHICKEN';
+  document.getElementById('e-dt').textContent='RND '+G.round+' \u00b7 '+G.hp[0]+'\u2665 LEFT \u00b7 STYLE: '+t;
+  show('s-end');
+}
+showTitle();
+</script>
+</body>
+</html>
